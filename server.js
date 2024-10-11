@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 var mongoose = require("mongoose");
 require("dotenv").config();
-const { MONGO_URL, PORT } = process.env;
+const MONGO_URL = process.env.MONGO_URL;
 const cors = require("cors");
 const port = 4000;
 const route = require("./routes/route");
@@ -13,9 +13,7 @@ dotenv.config();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 mongoose
-  .connect(
-    "mongodb+srv://michaelgreenerside:bxG0ZisfIP895l2M@cluster0.4gpel.mongodb.net/local_library?retryWrites=true&w=majority&appName=Cluster0"
-  )
+  .connect(MONGO_URL)
   .then(() => {
     console.log("Connected to MongoDB");
   })
