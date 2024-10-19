@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 var mongoose = require("mongoose");
 require("dotenv").config();
-const MONGO_URL = process.env.MONGO_URL;
+const mongoURI = process.env.MONGO_URI;
 const cors = require("cors");
 const port = 4000;
 const route = require("./routes/route");
@@ -13,9 +13,9 @@ dotenv.config();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 mongoose
-  .connect(MONGO_URL)
+  .connect(mongoURI) //
   .then(() => {
-    console.log("Connected to MongoDB");
+    console.log("connected to database");
   })
   .catch((error) => {
     console.error("Error connecting to MongoDB:", error);

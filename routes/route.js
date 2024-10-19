@@ -68,15 +68,60 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-    res.status(200).json({ message: "Login successful", token });
+    res.status(200).json({ message: "Login successful", token, email });
   } catch (error) {
     console.log("error", error);
     res.status(500).json({ message: "Server error, try again" });
   }
 });
 
-/*router.get("/protected", authenticateToken, (req, res) => {
-  res.status(200).json({ message: "This is a protected route" });
+const noteSchema = new mongoose.Schema({
+  email: String,
+  tab: [
+    {
+      id: String,
+      title: String,
+      value: String,
+      note: String,
+    },
+  ],
 });
-*/
+
+const Note = mongoose.model("notes", noteSchema);
+
+router.post("/savenote", async (req, res) => {
+  const { tab, email } = req.body;
+  console.log(tab, email);
+  try {
+    const noteExist = await Note.findOne({ email });
+
+    if (noteExist) {
+      console.log(noteExist);
+      noteExist.tab = tab;
+      await noteExist.save();
+      res.json(noteExist);
+    } else {
+      const newTaskList = new Note({ email, tab: [tab] });
+      await newTaskList.save();
+      res.json(newTaskList);
+    }
+  } catch (error) {
+    console.log("error", error);
+    res.status(500).json({ message: "Server error, try again" });
+  }
+});
+
+router.post("http://localhost:4000/getdata", async (req, res) => {
+  const { email } = req.body;
+  try {
+    const noteExist = await Note.findOne({ email });
+    if (noteExist) {
+      console.log(noteExist.tab);
+      res.send(noteExist.tab);
+    }
+  } catch (error) {
+    console.log("error", error);
+    res.status(500).json({ message: "Server error, try again" });
+  }
+});
 module.exports = router;
