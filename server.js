@@ -29,6 +29,10 @@ app.use(
   })
 );
 
+app.get("", (req, res) => {
+  res.send({ message: "welcome" });
+});
+
 app.use("/", route);
 
 const authenticateJWT = (req, res, next) => {
