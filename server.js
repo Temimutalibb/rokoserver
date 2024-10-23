@@ -33,6 +33,10 @@ app.get("/", (req, res) => {
   res.send("welcome");
 });
 
+app.get("/test", (req, res) => {
+  res.json({ message: "this is testing" });
+});
+
 app.use("/", route);
 
 const authenticateJWT = (req, res, next) => {
