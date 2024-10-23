@@ -29,8 +29,8 @@ app.use(
   })
 );
 
-app.get("", (req, res) => {
-  res.send({ message: "welcome" });
+app.get("/", (req, res) => {
+  res.send("welcome");
 });
 
 app.use("/", route);
