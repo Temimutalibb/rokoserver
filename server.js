@@ -21,20 +21,16 @@ mongoose
     console.error("Error connecting to MongoDB:", error);
   });
 
-app.use(
-  cors({
-    origin: ["https://roko-note.vercel.app/"],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  })
-);
+app.use(cors());
 
 app.get("/", (req, res) => {
   res.send("welcome");
 });
 
-app.get("/test", (req, res) => {
-  res.json({ message: "this is testing" });
+app.post("/test", (req, res) => {
+  const { message } = req.body;
+  console.log(message);
+  res.send({ message: "this is testing" });
 });
 
 app.use("/", route);
