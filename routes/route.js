@@ -33,7 +33,6 @@ const User = mongoose.model("User", UserSchema);
 
 router.post("/signup", async (req, res) => {
   const { email, password } = req.body;
-  console.log({ email, password });
 
   try {
     const existingUser = await User.findOne({ email });
