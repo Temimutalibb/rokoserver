@@ -27,9 +27,7 @@ app.get("/", (req, res) => {
   res.send("welcome");
 });
 
-app.post("/test", (req, res) => {
-  const { message } = req.body;
-  console.log(message);
+app.get("/test", (req, res) => {
   res.send({ message: "this is testing" });
 });
 
