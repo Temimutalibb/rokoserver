@@ -52,7 +52,6 @@ router.post("/signup", async (req, res) => {
 // Login route
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  console.log({ email, password });
 
   try {
     const user = await User.findOne({ email });
@@ -75,13 +74,13 @@ router.post("/login", async (req, res) => {
 });
 
 const noteSchema = new mongoose.Schema({
-  email: String,
+  email: { type: String, required: true },
   tab: [
     {
-      id: String,
-      title: String,
-      value: String,
-      note: String,
+      id: { type: String },
+      title: { type: String },
+      value: { type: String },
+      note: { type: [String], required: true },
     },
   ],
 });
@@ -90,14 +89,13 @@ const Note = mongoose.model("notes", noteSchema);
 
 router.post("/savenote", async (req, res) => {
   const { tab, email } = req.body;
-  console.log(tab, email);
   try {
     const noteExist = await Note.findOne({ email });
 
     if (noteExist) {
-      console.log(noteExist);
       noteExist.tab = tab;
       await noteExist.save();
+      console.log(noteExist.tab);
       res.json(noteExist);
     } else {
       const newTaskList = new Note({ email, tab: [tab] });
@@ -110,7 +108,7 @@ router.post("/savenote", async (req, res) => {
   }
 });
 
-router.post("http://localhost:4000/getdata", async (req, res) => {
+router.post("/getdata", async (req, res) => {
   const { email } = req.body;
   try {
     const noteExist = await Note.findOne({ email });
