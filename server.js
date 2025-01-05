@@ -21,7 +21,7 @@ mongoose
     console.error("Error connecting to MongoDB:", error);
   });
 
-app.use(cors({ origin: "https://roko-note.vercel.app" }));
+app.use(cors());
 
 app.get("/", (req, res) => {
   res.send("welcome");

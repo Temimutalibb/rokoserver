@@ -37,14 +37,12 @@ router.post("/signup", async (req, res) => {
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      console.log("exist");
-      return res.status(400).json({ message: "Email already exists" });
+      return res.json({ message: "Email already exists" });
     }
     const newUser = new User({ email, password });
     await newUser.save();
     res.status(201).json({ message: "User registered successfully, Login" });
   } catch (error) {
-    console.log("error", error);
     res.status(500).json({ message: "Server error, try again" });
   }
 });
@@ -56,19 +54,17 @@ router.post("/login", async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      console.log("email error");
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.json({ message: "Invalid email or password" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      console.log("password errror");
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.json({ message: "Invalid email or password" });
     }
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-    res.status(200).json({ message: "Login successful", token, email });
+
+    return res.status(200).json({ message: "Login successful", token, email });
   } catch (error) {
-    console.log("error", error);
     res.status(500).json({ message: "Server error, try again" });
   }
 });
@@ -81,6 +77,7 @@ const noteSchema = new mongoose.Schema({
       title: { type: String },
       value: { type: String },
       note: { type: [String], required: true },
+      inviteLink: { type: [String] },
     },
   ],
 });
@@ -95,7 +92,6 @@ router.post("/savenote", async (req, res) => {
     if (noteExist) {
       noteExist.tab = tab;
       await noteExist.save();
-      console.log(noteExist.tab);
       res.json(noteExist);
     } else {
       const newTaskList = new Note({ email, tab: [tab] });
@@ -103,7 +99,6 @@ router.post("/savenote", async (req, res) => {
       res.json(newTaskList);
     }
   } catch (error) {
-    console.log("error", error);
     res.status(500).json({ message: "Server error, try again" });
   }
 });
@@ -113,12 +108,67 @@ router.post("/getdata", async (req, res) => {
   try {
     const noteExist = await Note.findOne({ email });
     if (noteExist) {
-      console.log(noteExist.tab);
       res.send(noteExist.tab);
     }
   } catch (error) {
-    console.log("error", error);
     res.status(500).json({ message: "Server error, try again" });
   }
+});
+
+router.post("/invite", async (req, res) => {
+  const { id, email, edit } = req.body;
+  const randomNumber = Math.floor(Math.random() * 1000000) + 1;
+  const inviteLink = id;
+  const theValue = [inviteLink, edit];
+  console.log(id);
+
+  try {
+    const result = await Note.findOneAndUpdate(
+      { email, "tab.id": id },
+      { $set: { "tab.$.inviteLink": theValue } },
+      { new: true, upsert: true }
+    );
+    await result.save();
+    return res.json({ invite: "link generated sucess fully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error, try again" });
+  }
+});
+
+router.post("/getlink", async (req, res) => {
+  const { inviteLink } = req.body;
+
+  try {
+    const noteExist = await Note.findOne({
+      tab: { $elemMatch: { inviteLink: inviteLink } },
+    });
+    if (noteExist) {
+      console.log(noteExist.email);
+      res.send({ tab: noteExist.tab, email: noteExist.email });
+    } else {
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Server error, try again" });
+    console.log(error);
+  }
+});
+
+router.post("/saveinvite", async (req, res) => {
+  const { email, id, note, title } = req.body;
+  console.log(title);
+
+  try {
+    const query = { email: email, "tab.id": id };
+    const updateDocument = {
+      $set: { "tab.$.note": note, "tab.$.title": title },
+    };
+
+    const result = await Note.updateOne(query, updateDocument);
+    if (result.matchedCount === 1) {
+      console.log("Successfully updated the note.");
+    } else {
+      console.log("No matching document found.");
+    }
+  } catch (error) {}
 });
 module.exports = router;
